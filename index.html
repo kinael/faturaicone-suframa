@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <link rel="shortcut icon" type="imagex/png" href="https://i.imgur.com/Cq8GtlD.png">
+<meta charset="UTF-8">
+<title>Cálculo de Desconto para Clientes Suframa</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="dark-mode.css" id="dark-mode-stylesheet">
+<style>
+
+
+    .calculator {
+        position: fixed;
+        bottom: 20px;
+     color: black;
+        left: 20px;
+        border: 2px solid #ccc;
+        padding: 15px;
+        border-radius: 10px;
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        width: 230px; 
+        display: none; 
+    }
+    .calculator-screen {
+        width: 100%;
+        height: 60px; 
+        background-color: #f4f4f4;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        text-align: right;
+        padding: 10px;
+        font-size: 28px;
+        overflow: hidden;
+        box-sizing: border-box; 
+    }
+    .calculator-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+    }
+    .calculator-button {
+        width: 100%;
+        height: 60px; 
+        display: flex;
+color: black;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px; 
+        background-color: #e0e0e0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+    .calculator-button:hover {
+        background-color: #d0d0d0;
+    }
+    .calculator-button:active {
+        transform: scale(0.98);
+    }
+    .calculator-button.operator {
+        background-color: #fe9241;
+        color: black;
+    }
+    .calculator-button.double {
+        grid-column: span 2;
+    }
+    .calculator-button.double-operator {
+        grid-column: span 4;
+    }
+
+    .toggle-calculator {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background-color: #fe9241;
+        color: black;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: background-color 0.2s;
+    }
+    .toggle-calculator:hover {
+        background-color: #e07b34;
+    }
+</style>
+</head>
+<body>
+
+<div class="imagens">
+    <img src="https://i.imgur.com/h8LFj5s.png" />
+</div>
+
+<div class="container">
+  <h1 class="titulopg animate-text">Cálculo de Desconto - Suframa</h1>
+
+  <label for="valorTotal" class="animate-text"> <b> Valor total da ordem: </b> </label>
+  <input type="text" id="valorTotal" placeholder="Ex.: 2.800,50 ou 2800,50 (com vírgula)">
+
+  <label for="valorTotalN" class="animate-text"> <b> Valor dos produtos NACIONAIS: </b> </label>
+  <input type="text" id="valorTotalN" placeholder="Ex.: 600 ou 600,00 (com vírgula)">
+
+  <button onclick="calcularDesconto()">Concluir</button>
+  <button onclick="limpar()">Limpar</button>
+
+  <p id="valorDesconto" class="hidden"> <b> Valor do desconto: </b> <span id="resultado">XXX,XXX</span></p>
+  <p id="pisValue" class="hidden"> <b> PIS: </b> <span id="pisResult">XXX,XXX</span></p>
+  <p id="coffinsValue" class="hidden"> <b> Cofins: </b> <span id="coffinsResult">XXX,XXX</span></p>
+  <p id="calculoNValue" class="hidden"> <b> ICMS: </b> <span id="calculoNResult">XXX,XXX</span></p>
+  <p id="importadostotalValue" class="hidden"> <b> Total Importados: </b> <span id="importadostotalResult">XXX,XXX</span></p>
+  <p id="icmstotalValue" class="hidden"> <b> Total ICMS: </b> <span id="icmstotalResult">XXX,XXX</span></p>
+</div>
+
+<div class="historico">
+  <div class="titulo-historico">
+    <h2>Histórico de Descontos</h2>
+  </div>
+  <p id="infoHistorico">Estes são os últimos 5 descontos calculados:</p>
+  <ul id="historicoLista"></ul>
+  <div id="historicoFooter">
+    <button id="limparHistorico" title="Limpar histórico">Limpar histórico</button>
+  </div>
+</div>
+
+<hr class="linha" style="max-width: 800px;">
+<h1 id="links">Links Externos:</h1>
+<div class="botao-simples-nacional">
+</br>
+  <a href="https://www8.receita.fazenda.gov.br/SimplesNacional/aplicacoes.aspx?id=21" target="_blank" class="simples-nacional-btn">Consulta Simples Nacional</a>
+  <a href="https://solucoes.receita.fazenda.gov.br/Servicos/cnpjreva/Cnpjreva_Solicitacao.asp" target="_blank" class="simples-nacional-btn">Consulta Situação Cadastral</a>
+</div>
+
+<div class="botao-modo-escuro">
+  <button class="modo-escuro-btn" onclick="alternarModo()">Modo Escuro</button>
+</div>
+
+ <button type="button" id="sobreBtn" onclick="exibirModalSobre()">Sobre</button>
+
+ <div id="modalSobre" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="fecharModalSobre()">&times;</span>
+    <p> Ferramenta desenvolvida para calcular o desconto aplicado em pedidos de clientes pertencentes à ZFM (Zona Franca de Manaus), quando estiver verificado que o cliente possui direito a este benefício. <br> </p>
+  </div>
+</div>
+
+<div class="calculator" id="calculator">
+    <div class="calculator-screen" id="calculator-screen">0</div>
+    <div class="calculator-buttons">
+        <div class="calculator-button" onclick="appendNumber('7')">7</div>
+        <div class="calculator-button" onclick="appendNumber('8')">8</div>
+        <div class="calculator-button" onclick="appendNumber('9')">9</div>
+        <div class="calculator-button operator" onclick="setOperator('/')">/</div>
+        <div class="calculator-button" onclick="appendNumber('4')">4</div>
+        <div class="calculator-button" onclick="appendNumber('5')">5</div>
+        <div class="calculator-button" onclick="appendNumber('6')">6</div>
+        <div class="calculator-button operator" onclick="setOperator('*')">*</div>
+        <div class="calculator-button" onclick="appendNumber('1')">1</div>
+        <div class="calculator-button" onclick="appendNumber('2')">2</div>
+        <div class="calculator-button" onclick="appendNumber('3')">3</div>
+        <div class="calculator-button operator" onclick="setOperator('-')">-</div>
+        <div class="calculator-button double" onclick="appendNumber('0')">0</div>
+        <div class="calculator-button" onclick="appendNumber('.')">.</div>
+        <div class="calculator-button operator" onclick="setOperator('+')">+</div>
+        <div class="calculator-button double-operator" onclick="calculateResult()">=</div>
+        <div class="calculator-button double-operator" onclick="clearScreen()">C</div>
+    </div>
+</div>
+
+<button class="toggle-calculator" onclick="toggleCalculator()">&#x1F522;</button> 
+
+<script>
+    let currentInput = '';
+    let operator = null;
+    let firstOperand = null;
+
+    function appendNumber(number) {
+        if (currentInput === '0' && number !== '.') {
+            currentInput = number;
+        } else {
+            currentInput += number;
+        }
+        updateScreen();
+    }
+
+    function setOperator(op) {
+        if (operator !== null) {
+            calculateResult();
+        }
+        firstOperand = parseFloat(currentInput);
+        operator = op;
+        currentInput = '';
+    }
+
+    function calculateResult() {
+        if (operator === null || currentInput === '') return;
+        const secondOperand = parseFloat(currentInput);
+        let result;
+        switch (operator) {
+            case '+':
+                result = firstOperand + secondOperand;
+                break;
+            case '-':
+                result = firstOperand - secondOperand;
+                break;
+            case '*':
+                result = firstOperand * secondOperand;
+                break;
+            case '/':
+                result = firstOperand / secondOperand;
+                break;
+            default:
+                return;
+        }
+        currentInput = result.toString();
+        operator = null;
+        firstOperand = null;
+        updateScreen();
+    }
+
+    function clearScreen() {
+        currentInput = '';
+        operator = null;
+        firstOperand = null;
+        updateScreen();
+    }
+
+    function updateScreen() {
+        document.getElementById('calculator-screen').innerText = currentInput || '0';
+    }
+
+    function toggleCalculator() {
+        const calculator = document.getElementById('calculator');
+        const isVisible = calculator.style.display === 'block';
+        calculator.style.display = isVisible ? 'none' : 'block';
+    }
+</script>
+
+<script src="script.js"></script>
+</body>
+</html>
